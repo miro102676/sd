@@ -1,0 +1,505 @@
+ <!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-bg: #0a0a12;
+            --card-bg: #12121f;
+            --card-border: #25253d;
+            --accent: #6a2cbe;
+            --accent-light: #8d5ee3;
+            --text: #ffffff;
+            --text-secondary: #b3b3cc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+            letter-spacing: 0.5px;
+        }
+        
+        .admin-actions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: var(--text);
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(106, 44, 190, 0.3);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(106, 44, 190, 0.4);
+        }
+        
+        .applications-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .application-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+        
+        .application-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 5px 20px rgba(106, 44, 190, 0.15);
+        }
+        
+        .application-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .application-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .application-content {
+            display: grid;
+            gap: 18px;
+        }
+        
+        .question-item {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .question-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        .answer-text {
+            color: var(--text);
+            background: rgba(106, 44, 190, 0.1);
+            padding: 14px 18px;
+            border-radius: 10px;
+            border-left: 3px solid var(--accent);
+            line-height: 1.5;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        
+        .no-data i {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+            opacity: 0.7;
+        }
+        
+        .no-data h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+        
+        @media (max-width: 768px) {
+            .application-header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 12px 20px;
+            }
+        }
+        
+        /* Анимации */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    .application-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: rgba(106, 44, 190, 0.1);
+    transform: scale(1.1);
+}    
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header fade-in">
+            <h1>Анкеты клиентов</h1>
+        </div>
+        
+        <div class="admin-actions">
+            <button class="btn fade-in" onclick="loadApplications()">
+                <i class="fas fa-sync-alt"></i> Обновить
+            </button>
+        </div>
+        
+        <div class="applications-list" id="applicationsList">
+            <div class="no-data fade-in">
+                <i class="fas fa-inbox"></i>
+                <h3>Заявок пока нет</h3>
+                <p>Новые анкеты появятся здесь</p>
+            </div>
+        </div>
+    </div>
+ <script>
+    let allApplications = [];
+    
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        loadApplications();
+        setupMobileOptimization();
+        setupEventListeners();
+    });
+    
+    // Загрузка заявок
+    function loadApplications() {
+        try {
+            const applications = JSON.parse(localStorage.getItem('propaganda_applications') || '[]');
+            allApplications = applications;
+            displayApplications(applications);
+            updateStats(applications);
+        } catch (error) {
+            console.error('Ошибка загрузки заявок:', error);
+            showError();
+        }
+    }
+    
+    // Отображение заявок
+    function displayApplications(applications) {
+        const applicationsList = document.getElementById('applicationsList');
+        
+        if (!applications || applications.length === 0) {
+            applicationsList.innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <h3>Заявок пока нет</h3>
+                    <p>Новые анкеты появятся здесь</p>
+                </div>
+            `;
+            return;
+        }
+        
+        applicationsList.innerHTML = '';
+        
+        // Сортируем по дате (новые сверху)
+        applications.sort((a, b) => b.id - a.id).forEach((app, index) => {
+            const appElement = document.createElement('div');
+            appElement.className = 'application-card fade-in';
+            appElement.style.animationDelay = `${index * 0.1}s`;
+            
+            const formattedDate = app.timestamp || new Date(app.id).toLocaleString('ru-RU');
+            
+            appElement.innerHTML = `
+                <div class="application-header">
+                    <div class="application-date">${formattedDate}</div>
+                    <div class="application-actions">
+                        <button class="action-btn" onclick="viewApplication(${app.id})" title="Просмотреть">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="action-btn" onclick="deleteApplication(${app.id})" title="Удалить" style="color: #ff4757;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="application-content">
+                    <div class="question-item">
+                        <div class="question-text">Имя</div>
+                        <div class="answer-text">${app.name || 'Не указано'}</div>
+                    </div>
+                    <div class="question-item">
+                        <div class="question-text">Телеграм</div>
+                        <div class="answer-text">${app.telegram || 'Не указан'}</div>
+                    </div>
+                    <div class="question-item">
+                        <div class="question-text">Услуги</div>
+                        <div class="answer-text">${app.services ? app.services.substring(0, 100) + (app.services.length > 100 ? '...' : '') : 'Не указаны'}</div>
+                    </div>
+                </div>
+            `;
+            
+            applicationsList.appendChild(appElement);
+        });
+    }
+    
+    // Просмотр полной заявки
+    function viewApplication(appId) {
+        const app = allApplications.find(a => a.id === appId);
+        if (!app) return;
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: var(--card-bg); padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Заявка #${app.id}</h3>
+                    <button onclick="this.closest('[style]').remove()" style="background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer;">×</button>
+                </div>
+                <div style="margin-bottom: 15px;"><strong>Дата:</strong> ${app.timestamp}</div>
+                <div style="margin-bottom: 15px;"><strong>Имя:</strong> ${app.name || 'Не указано'}</div>
+                <div style="margin-bottom: 15px;"><strong>Телеграм:</strong> ${app.telegram || 'Не указан'}</div>
+                <div style="margin-bottom: 15px;"><strong>Услуги:</strong><br>${app.services || 'Не указаны'}</div>
+                <div style="margin-bottom: 15px;"><strong>Соцсети:</strong><br>${app.socialLinks || 'Не указаны'}</div>
+                ${app.device ? `<div style="margin-bottom: 15px;"><strong>Устройство:</strong><br>${JSON.stringify(app.device, null, 2)}</div>` : ''}
+                <button onclick="copyApplicationData(${app.id})" style="background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 15px;">
+                    <i class="fas fa-copy"></i> Копировать данные
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Закрытие по клику вне модального окна
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+    
+    // Удаление заявки
+    function deleteApplication(appId) {
+        if (confirm('Удалить эту заявку?')) {
+            const updatedApplications = allApplications.filter(app => app.id !== appId);
+            localStorage.setItem('propaganda_applications', JSON.stringify(updatedApplications));
+            allApplications = updatedApplications;
+            displayApplications(updatedApplications);
+            updateStats(updatedApplications);
+        }
+    }
+    
+    // Копирование данных заявки
+    function copyApplicationData(appId) {
+        const app = allApplications.find(a => a.id === appId);
+        if (!app) return;
+        
+        const dataString = JSON.stringify(app, null, 2);
+        navigator.clipboard.writeText(dataString).then(() => {
+            alert('Данные скопированы!');
+        }).catch(err => {
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = dataString;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Данные скопированы!');
+        });
+    }
+    
+    // Обновление статистики
+    function updateStats(applications) {
+        const statsElement = document.getElementById('stats') || createStatsElement();
+        statsElement.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="background: rgba(106, 44, 190, 0.2); padding: 15px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">${applications.length}</div>
+                    <div>Всего заявок</div>
+                </div>
+                <div style="background: rgba(106, 44, 190, 0.2); padding: 15px; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold;">${new Set(applications.map(app => app.name)).size}</div>
+                    <div>Уникальных клиентов</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Создание элемента статистики
+    function createStatsElement() {
+        const statsElement = document.createElement('div');
+        statsElement.id = 'stats';
+        document.querySelector('.admin-container').insertBefore(statsElement, document.getElementById('applicationsList'));
+        return statsElement;
+    }
+    
+    // Экспорт в CSV
+    function exportToCSV() {
+        if (allApplications.length === 0) {
+            alert('Нет данных для экспорта');
+            return;
+        }
+        
+        let csv = 'Дата;Имя;Телеграм;Услуги;Соцсети\n';
+        
+        allApplications.forEach(app => {
+            const date = app.timestamp || new Date(app.id).toLocaleString('ru-RU');
+            const name = app.name || '';
+            const telegram = app.telegram || '';
+            const services = app.services ? app.services.replace(/"/g, '""').replace(/;/g, ',') : '';
+            const socialLinks = app.socialLinks ? app.socialLinks.replace(/"/g, '""').replace(/;/g, ',') : '';
+            
+            csv += `"${date}";"${name}";"${telegram}";"${services}";"${socialLinks}"\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `applications_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    }
+    
+    // Очистка всех заявок
+    function clearAllApplications() {
+        if (confirm('ВЫ УВЕРЕНЫ? Это удалит ВСЕ заявки!')) {
+            localStorage.removeItem('propaganda_applications');
+            allApplications = [];
+            displayApplications([]);
+            updateStats([]);
+        }
+    }
+    
+    // Поиск по заявкам
+    function searchApplications() {
+        const searchTerm = prompt('Введите текст для поиска:');
+        if (!searchTerm) return;
+        
+        const filteredApplications = allApplications.filter(app => 
+            (app.name && app.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (app.services && app.services.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (app.socialLinks && app.socialLinks.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (app.telegram && app.telegram.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+        
+        displayApplications(filteredApplications);
+    }
+    
+    // Настройка мобильной оптимизации
+    function setupMobileOptimization() {
+        if (window.innerWidth <= 768) {
+            document.querySelector('.admin-actions').style.flexDirection = 'column';
+            document.querySelector('.admin-actions').style.gap = '10px';
+            
+            document.querySelectorAll('.application-card').forEach(card => {
+                card.style.padding = '15px';
+            });
+        }
+    }
+    
+    // Настройка обработчиков событий
+    function setupEventListeners() {
+        window.addEventListener('resize', setupMobileOptimization);
+    }
+    
+    // Показать ошибку
+    function showError() {
+        const applicationsList = document.getElementById('applicationsList');
+        applicationsList.innerHTML = `
+            <div class="no-data">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Ошибка загрузки</h3>
+                <p>Проверьте данные в localStorage</p>
+            </div>
+        `;
+    }
+    
+    // Глобальные функции
+    window.loadApplications = loadApplications;
+    window.exportToCSV = exportToCSV;
+    window.searchApplications = searchApplications;
+    window.clearAllApplications = clearAllApplications;
+    window.viewApplication = viewApplication;
+    window.deleteApplication = deleteApplication;
+    window.copyApplicationData = copyApplicationData;
+    
+    // Автообновление каждые 10 секунд
+    setInterval(loadApplications, 10000);
+</script>
+</body>
+</html>
